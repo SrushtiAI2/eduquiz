@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import img from '../../../public/banner.png';
 import img1 from '../../banner1.png';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 
 const Register = () => {
@@ -53,9 +54,10 @@ const Register = () => {
       <Card className="w-full max-w-md shadow-xl dark:bg-gray-800 dark:border-gray-700">
         <CardHeader className="space-y-1 text-center">
           {/* <CardTitle className="text-3xl font-bold text-blue-800 dark:text-blue-400">Create Account</CardTitle> */}
-          <div className='text-3xl font-bold text-blue-800 dark:text-blue-400 mx-auto'>
+          {/* <div className='text-3xl font-bold text-blue-800 dark:text-blue-400 mx-auto'>
             <img src={img} alt='' width={150} />
-          </div>
+          </div> */}
+          <ThemeToggle />
           <div className='text-3xl font-bold text-blue-800 dark:text-blue-400 mx-auto'>
             {/* Light mode image */}
             <img src={img1} alt="Light mode banner" width={150} className="block dark:hidden" />
