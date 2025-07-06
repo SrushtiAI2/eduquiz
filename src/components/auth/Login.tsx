@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import img from '../../../public/banner.png';
+import img1 from '../../banner1.png';
+
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -41,6 +43,12 @@ const Login = () => {
           {/* <CardTitle className="text-3xl font-bold text-blue-800 dark:text-blue-400">Srushti</CardTitle> */}
           <div className='text-3xl font-bold text-blue-800 dark:text-blue-400 mx-auto'>
             <img src={img} alt='' width={150} />
+          </div>
+          <div className='text-3xl font-bold text-blue-800 dark:text-blue-400 mx-auto'>
+            {/* Light mode image */}
+            <img src={img1} alt="Light mode banner" width={150} className="block dark:hidden" />
+            {/* Dark mode image */}
+            <img src={img} alt="Dark mode banner" width={150} className="hidden dark:block" />
           </div>
           <CardDescription className="text-gray-600 dark:text-gray-400">
             Sign in to create intelligent test papers
