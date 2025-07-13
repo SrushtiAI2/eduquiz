@@ -3,6 +3,11 @@ export interface User {
   email: string;
   name: string;
   created_at: string;
+  email_preferences?: {
+    daily_reminders: boolean;
+    reminder_time: string; // Format: "HH:MM"
+    timezone: string;
+  };
 }
 
 export interface TestPaper {
