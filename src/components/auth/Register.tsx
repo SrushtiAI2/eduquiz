@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import img from '../../../public/banner.png';
 import img1 from '../../banner1.png';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
@@ -41,9 +42,23 @@ const Register = () => {
         variant: "destructive",
       });
     } else {
+      // Send welcome/confirmation email
+      try {
+        await supabase.functions.invoke('send-daily-reminders', {
+          body: {
+            action: 'send_confirmation_email',
+            email: email,
+            userName: name
+          }
+        });
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+        // Don't show error to user as account creation was successful
+      }
+      
       toast({
         title: "Account created!",
-        description: "Please check your email to verify your account.",
+        description: "Welcome to Srushti! Please check your email for a beautiful welcome message and account confirmation.",
       });
     }
     setLoading(false);

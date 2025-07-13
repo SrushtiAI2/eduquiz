@@ -6,6 +6,7 @@ import Register from '@/components/auth/Register';
 import Dashboard from '@/components/dashboard/Dashboard';
 import TestGenerator from '@/components/generator/TestGenerator';
 import TestViewer from '@/components/viewer/TestViewer';
+import SkipToday from '@/pages/SkipToday';
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -38,6 +39,7 @@ const Index = () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="/generate" element={<TestGenerator />} />
           <Route path="/test/:id" element={<TestViewer />} />
+          <Route path="/skip-today" element={<SkipToday />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

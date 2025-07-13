@@ -9,11 +9,13 @@ import { TestPaper } from '@/types/user';
 import { FileText, Plus, Clock, Settings } from 'lucide-react';
 import img from '../../banner.png';
 import img1 from '../../banner1.png';
+import EmailPreferences from '@/components/settings/EmailPreferences';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const [tests, setTests] = useState<TestPaper[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showEmailPreferences, setShowEmailPreferences] = useState(false);
 
   useEffect(() => {
     fetchTests();
@@ -79,6 +81,14 @@ const Dashboard = () => {
               <span className="text-gray-700 dark:text-gray-300 hidden sm:block">
                 Welcome, {user?.user_metadata?.name || user?.email}
               </span>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowEmailPreferences(!showEmailPreferences)}
+                className="dark:border-gray-600 dark:text-gray-300"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
               <ThemeToggle />
               <Button variant="outline" onClick={signOut}>
                 Logout
@@ -148,6 +158,12 @@ const Dashboard = () => {
             </Card>
           </div>
         </div>
+
+        {showEmailPreferences && (
+          <div className="mb-6 sm:mb-8">
+            <EmailPreferences />
+          </div>
+        )}
 
         <div>
           <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Test Papers</h3>
