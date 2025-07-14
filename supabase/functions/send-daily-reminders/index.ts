@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -479,17 +480,36 @@ const getConfirmationEmailTemplate = (userName: string, confirmUrl: string) => {
 };
 
 async function sendEmail(to: string, subject: string, htmlContent: string) {
-  // You'll need to configure your email service here
-  // This is a placeholder for email sending functionality
-  // You can use services like SendGrid, Mailgun, or AWS SES
-  
-  console.log(`Sending email to: ${to}`);
-  console.log(`Subject: ${subject}`);
-  console.log(`HTML Content length: ${htmlContent.length}`);
-  
-  // For now, we'll just log the email content
-  // In production, you would integrate with an actual email service
-  return { success: true, message: 'Email sent successfully' };
+  try {
+    // Gmail SMTP configuration
+    const client = new SMTPClient({
+      connection: {
+        hostname: "smtp.gmail.com",
+        port: 587,
+        tls: true,
+        auth: {
+          username: "srushtiai.shreyash@gmail.com",
+          password: Deno.env.get('GMAIL_APP_PASSWORD'), // Gmail App Password
+        },
+      },
+    });
+
+    await client.send({
+      from: "srushtiai.shreyash@gmail.com",
+      to: to,
+      subject: subject,
+      content: "text/html",
+      html: htmlContent,
+    });
+
+    await client.close();
+    
+    console.log(`Email sent successfully to: ${to}`);
+    return { success: true, message: 'Email sent successfully via Gmail' };
+  } catch (error) {
+    console.error('Error sending email via Gmail:', error);
+    return { success: false, message: `Failed to send email: ${error.message}` };
+  }
 }
 
 Deno.serve(async (req) => {
