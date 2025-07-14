@@ -10,8 +10,6 @@ import img from '../../../public/banner.png';
 import img1 from '../../banner1.png';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
-
-
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -79,14 +77,30 @@ const Register = () => {
           },
         },
       });
+
+      if (error) {
+        toast({
+          title: "Google Sign-Up Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Google sign-up error:', error);
+      toast({
+        title: "Sign-Up Failed",
+        description: "Failed to sign up with Google. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <Card className="w-full max-w-md shadow-xl dark:bg-gray-800 dark:border-gray-700">
         <CardHeader className="space-y-1 text-center">
-          {/* <CardTitle className="text-3xl font-bold text-blue-800 dark:text-blue-400">Create Account</CardTitle> */}
-          {/* <div className='text-3xl font-bold text-blue-800 dark:text-blue-400 mx-auto'>
-            <img src={img} alt='' width={150} />
-          </div> */}
           <ThemeToggle />
           <div className='text-3xl font-bold text-blue-800 dark:text-blue-400 mx-auto'>
             {/* Light mode image */}
@@ -202,22 +216,4 @@ const Register = () => {
   );
 };
 
-      if (error) {
-        toast({
-          title: "Google Sign-Up Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Google sign-up error:', error);
-      toast({
-        title: "Sign-Up Failed",
-        description: "Failed to sign up with Google. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
 export default Register;
