@@ -534,8 +534,8 @@ Deno.serve(async (req) => {
       const results = [];
       
       for (const user of users || []) {
-        const skipUrl = `${Deno.env.get('SITE_URL')}/skip-today?user=${user.id}`;
-        const takeTestUrl = `${Deno.env.get('SITE_URL')}/generate`;
+        const skipUrl = `https://quiet-hummingbird-289e0a.netlify.app/skip-today?user=${user.id}`;
+        const takeTestUrl = `https://quiet-hummingbird-289e0a.netlify.app/generate`;
         
         const emailContent = getDailyReminderEmailTemplate(
           user.name,
@@ -559,7 +559,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'send_confirmation_email') {
-      const confirmUrl = `${Deno.env.get('SITE_URL')}/confirm?token=example_token`;
+      const confirmUrl = `https://quiet-hummingbird-289e0a.netlify.app`;
       
       const emailContent = getConfirmationEmailTemplate(userName, confirmUrl);
       
