@@ -81,14 +81,14 @@ const Dashboard = () => {
               <span className="text-gray-700 dark:text-gray-300 hidden sm:block">
                 Welcome, {user?.user_metadata?.name || user?.email}
               </span>
-              <Button 
+              {/* <Button 
                 variant="outline" 
                 onClick={() => setShowEmailPreferences(!showEmailPreferences)}
                 className="dark:border-gray-600 dark:text-gray-300"
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
-              </Button>
+              </Button> */}
               <ThemeToggle />
               <Button variant="outline" onClick={signOut}>
                 Logout
