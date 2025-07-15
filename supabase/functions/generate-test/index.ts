@@ -179,11 +179,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (questionCount < 1 || questionCount > 50) {
+    if (questionCount < 1 || questionCount > 20) {
       return new Response(
         JSON.stringify({ 
           error: 'Invalid question count',
-          details: 'Question count must be between 1 and 50',
+          details: 'Question count must be between 1 and 20 for optimal AI processing',
           code: 'INVALID_QUESTION_COUNT'
         }),
         { 
@@ -202,9 +202,15 @@ Deno.serve(async (req) => {
     let imageContents: any[] = [];
     
     if (sourceDocuments && sourceDocuments.length > 0) {
+      // Limit processing to prevent AI overload
+      const limitedDocuments = sourceDocuments.slice(0, 10);
+      if (sourceDocuments.length > 10) {
+        console.log(`Limiting document processing to first 10 out of ${sourceDocuments.length} documents`);
+      }
+      
       console.log('=== Processing Source Documents ===');
       try {
-        const processed = await processSourceDocuments(sourceDocuments);
+        const processed = await processSourceDocuments(limitedDocuments);
         extractedDocumentText = processed.extractedText;
         imageContents = processed.imageContents;
         console.log(`Text extraction result: ${extractedDocumentText.length} characters`);
@@ -341,7 +347,7 @@ ${type === 'mcq' ? `
           temperature: 0.7,
           topK: 40,
           topP: 0.95,
-          maxOutputTokens: 8192, // Increased for up to 50 questions
+          maxOutputTokens: 4096, // Optimized for up to 20 questions
         }
       }),
     });

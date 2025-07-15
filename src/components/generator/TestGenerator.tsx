@@ -49,11 +49,11 @@ const TestGenerator = () => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    // Check if total files would exceed 100
-    if (formData.sourceDocuments.length + files.length > 100) {
+    // Check if total files would exceed 10 (reduced for better AI processing)
+    if (formData.sourceDocuments.length + files.length > 10) {
       toast({
         title: "Too many files",
-        description: "You can upload a maximum of 100 files. Please remove some files first.",
+        description: "You can upload a maximum of 10 files at once for optimal AI processing. Please remove some files first.",
         variant: "destructive",
       });
       return;
@@ -74,8 +74,8 @@ const TestGenerator = () => {
         }
 
         // Check file size (max 25MB)
-        if (file.size > 25 * 1024 * 1024) {
-          failedUploads.push(`${file.name} (file too large - max 25MB)`);
+        if (file.size > 10 * 1024 * 1024) {
+          failedUploads.push(`${file.name} (file too large - max 10MB)`);
           continue;
         }
 
@@ -117,10 +117,10 @@ const TestGenerator = () => {
         const pdfCount = newDocuments.filter(doc => doc.type.includes('pdf')).length;
         const imageCount = newDocuments.filter(doc => doc.type.includes('image')).length;
         
-        let description = `${newDocuments.length} file(s) uploaded successfully. `;
-        if (pdfCount > 0) description += `${pdfCount} PDF(s) will be processed for text extraction. `;
-        if (imageCount > 0) description += `${imageCount} image(s) will be analyzed using AI vision. `;
-        description += 'The AI will generate questions based on all uploaded content.';
+        let description = `${newDocuments.length} file(s) uploaded successfully! `;
+        if (pdfCount > 0) description += `📄 ${pdfCount} PDF(s) ready for text extraction. `;
+        if (imageCount > 0) description += `🖼️ ${imageCount} image(s) ready for AI vision analysis. `;
+        description += '🤖 AI will process all content to generate intelligent questions.';
         
         toast({
           title: "Files uploaded successfully",
@@ -186,12 +186,15 @@ const TestGenerator = () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
-          facingMode: 'environment' // Use back camera on mobile
+          facingMode: 'environment', // Use back camera on mobile
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         } 
       });
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.play();
         setCameraActive(true);
       }
     } catch (error) {
@@ -222,6 +225,8 @@ const TestGenerator = () => {
 
     if (!context) return;
 
+    setUploadingFiles(true);
+
     // Set canvas dimensions to match video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -234,7 +239,6 @@ const TestGenerator = () => {
       if (!blob) return;
 
       try {
-        setUploadingFiles(true);
         
         // Create file from blob
         const file = new File([blob], `camera-capture-${Date.now()}.jpg`, { type: 'image/jpeg' });
@@ -265,7 +269,7 @@ const TestGenerator = () => {
 
         toast({
           title: "Photo captured successfully",
-          description: "The captured image has been added and will be analyzed by AI to generate questions.",
+          description: "📸 Photo captured and uploaded! AI will analyze this image to generate relevant questions.",
         });
 
         // Stop camera after capture
@@ -280,7 +284,7 @@ const TestGenerator = () => {
       } finally {
         setUploadingFiles(false);
       }
-    }, 'image/jpeg', 0.8);
+    }, 'image/jpeg', 0.9); // Higher quality
   };
 
   const handleGalleryUpload = () => {
@@ -545,49 +549,91 @@ const TestGenerator = () => {
               {/* Camera View */}
               {cameraActive && (
                 <div className="space-y-4">
-                  <div className="relative bg-black rounded-lg overflow-hidden">
+                  <div className="relative bg-black rounded-lg overflow-hidden border-2 border-blue-500">
                     <video
                       ref={videoRef}
                       autoPlay
                       playsInline
-                      className="w-full h-48 sm:h-64 object-cover"
+                      muted
+                      className="w-full h-64 sm:h-80 object-cover"
                     />
                     <canvas ref={canvasRef} className="hidden" />
+                    
+                    {/* Camera overlay UI */}
+                    <div className="absolute inset-0 pointer-events-none">
+                      {/* Viewfinder grid */}
+                      <div className="absolute inset-4 border-2 border-white/30 rounded-lg">
+                        <div className="absolute top-1/3 left-0 right-0 h-px bg-white/20"></div>
+                        <div className="absolute top-2/3 left-0 right-0 h-px bg-white/20"></div>
+                        <div className="absolute left-1/3 top-0 bottom-0 w-px bg-white/20"></div>
+                        <div className="absolute left-2/3 top-0 bottom-0 w-px bg-white/20"></div>
+                      </div>
+                      
+                      {/* Corner indicators */}
+                      <div className="absolute top-4 left-4 w-6 h-6 border-l-2 border-t-2 border-white/60"></div>
+                      <div className="absolute top-4 right-4 w-6 h-6 border-r-2 border-t-2 border-white/60"></div>
+                      <div className="absolute bottom-4 left-4 w-6 h-6 border-l-2 border-b-2 border-white/60"></div>
+                      <div className="absolute bottom-4 right-4 w-6 h-6 border-r-2 border-b-2 border-white/60"></div>
+                    </div>
                   </div>
-                  <div className="flex justify-center space-x-4">
-                    <Button onClick={capturePhoto} disabled={uploadingFiles}>
+                  
+                  <div className="flex justify-center space-x-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+                    <Button 
+                      onClick={capturePhoto} 
+                      disabled={uploadingFiles}
+                      size="lg"
+                      className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 px-8"
+                    >
                       {uploadingFiles ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Processing...
+                          Uploading...
                         </>
                       ) : (
-                        'Capture Photo'
+                        <>
+                          <Camera className="w-4 h-4 mr-2" />
+                          📸 Capture Photo
+                        </>
                       )}
                     </Button>
-                    <Button onClick={stopCamera} variant="outline" className="dark:border-gray-600">
-                      Cancel
+                    <Button 
+                      onClick={stopCamera} 
+                      variant="outline" 
+                      size="lg"
+                      className="dark:border-gray-600 px-8"
+                    >
+                      ❌ Cancel
                     </Button>
+                  </div>
+                  
+                  <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                    📋 Position your document or notes within the frame and tap capture
                   </div>
                 </div>
               )}
 
               <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                {formData.sourceDocuments.length}/100 files uploaded
+                {formData.sourceDocuments.length}/10 files uploaded • Max 10MB per file
               </p>
 
               {/* Display uploaded files */}
               {formData.sourceDocuments.length > 0 && (
                 <div className="space-y-2">
-                  <Label className="dark:text-white">Uploaded Files ({formData.sourceDocuments.length}/100)</Label>
+                  <Label className="dark:text-white">📁 Uploaded Files ({formData.sourceDocuments.length}/10)</Label>
                   <div className="max-h-40 overflow-y-auto space-y-2 border border-gray-200 dark:border-gray-600 rounded-lg p-3 bg-gray-50 dark:bg-gray-700">
                     {formData.sourceDocuments.map((doc, index) => (
                       <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-600">
                         <div className="flex items-center space-x-2">
                           {doc.type.includes('pdf') ? (
-                            <FileText className="w-4 h-4 text-red-600 dark:text-red-400" />
+                            <div className="flex items-center">
+                              <FileText className="w-4 h-4 text-red-600 dark:text-red-400" />
+                              <span className="ml-1 text-xs">📄</span>
+                            </div>
                           ) : (
-                            <Image className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            <div className="flex items-center">
+                              <Image className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                              <span className="ml-1 text-xs">🖼️</span>
+                            </div>
                           )}
                           <span className="text-sm font-medium truncate max-w-xs dark:text-white">{doc.name}</span>
                           <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -711,12 +757,15 @@ const TestGenerator = () => {
                   <Input
                     id="questionCount"
                     type="number"
-                    min="5"
-                    max="50"
+                    min="1"
+                    max="20"
                     value={formData.questionCount}
                     onChange={(e) => setFormData({ ...formData, questionCount: parseInt(e.target.value) })}
                     className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Recommended: 5-15 questions for optimal AI processing and quality
+                  </p>
                 </div>
 
                 <div className="space-y-2">
