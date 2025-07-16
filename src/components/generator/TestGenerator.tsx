@@ -588,7 +588,7 @@ const TestGenerator = () => {
                 /* File Upload Mode */
                 <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                {isMobile && (
+                {/* {isMobile && (
                   <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 sm:p-6 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
                     <Camera className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
                     <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-2">Take Photo</h3>
@@ -603,7 +603,7 @@ const TestGenerator = () => {
                       {cameraActive ? 'Camera Active' : 'Open Camera'}
                     </Button>
                   </div>
-                )}
+                )} */}
 
                 <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 sm:p-6 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
                   <Image className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
@@ -741,15 +741,25 @@ const TestGenerator = () => {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="document-text" className="dark:text-white">Or paste text content here</Label>
+                <Label htmlFor="document-text" className="dark:text-white">Or Simply describe what you want questions about, and our AI will generate them for you!</Label>
                 <Textarea
                   id="document-text"
-                  placeholder="Paste the content you want to generate questions from..."
+                  placeholder="Example: 'Generate questions about photosynthesis in plants' or 'Create questions on JavaScript functions and closures' or 'Make questions about World War 2 history'"
                   value={documentText}
                   onChange={(e) => setDocumentText(e.target.value)}
                   rows={6}
                   className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                      <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">💡 Pro Tips:</h4>
+                      <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
+                        <li>• Be specific about the topic (e.g., "Mitochondria function in cells")</li>
+                        <li>• Mention the subject level (e.g., "High school chemistry")</li>
+                        <li>• Include any specific areas to focus on</li>
+                        <li>• The AI will create questions based on general knowledge of the topic</li>
+                      </ul>
+                    </div>
+                  </div>
               </div>
                 </>
               )}
