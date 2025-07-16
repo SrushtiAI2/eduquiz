@@ -183,7 +183,7 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Invalid question count',
-          details: 'Question count must be between 1 and 20 for optimal AI processing',
+          details: 'Question count must be between 1 and 20 for optimal AI processing. Mobile users are recommended to use 5-10 questions.',
           code: 'INVALID_QUESTION_COUNT'
         }),
         { 
@@ -203,9 +203,10 @@ Deno.serve(async (req) => {
     
     if (sourceDocuments && sourceDocuments.length > 0) {
       // Limit processing to prevent AI overload
-      const limitedDocuments = sourceDocuments.slice(0, 10);
-      if (sourceDocuments.length > 10) {
-        console.log(`Limiting document processing to first 10 out of ${sourceDocuments.length} documents`);
+      const maxDocs = sourceDocuments.length > 5 ? 5 : sourceDocuments.length; // Reduce for mobile compatibility
+      const limitedDocuments = sourceDocuments.slice(0, maxDocs);
+      if (sourceDocuments.length > maxDocs) {
+        console.log(`Limiting document processing to first ${maxDocs} out of ${sourceDocuments.length} documents for optimal mobile performance`);
       }
       
       console.log('=== Processing Source Documents ===');
@@ -347,7 +348,7 @@ ${type === 'mcq' ? `
           temperature: 0.7,
           topK: 40,
           topP: 0.95,
-          maxOutputTokens: 4096, // Optimized for up to 20 questions
+          maxOutputTokens: 3072, // Reduced for better mobile performance
         }
       }),
     });

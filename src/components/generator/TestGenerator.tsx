@@ -22,6 +22,7 @@ const TestGenerator = () => {
     instructions: '',
     sourceDocuments: [] as SourceDocument[],
     photoData: null as string | null,
+    aiPrompt: '', // New field for direct AI prompting
   });
   const [loading, setLoading] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState(false);
@@ -29,6 +30,7 @@ const TestGenerator = () => {
   const [generatedTest, setGeneratedTest] = useState<TestPaper | null>(null);
   const [documentText, setDocumentText] = useState('');
   const [isMobile, setIsMobile] = useState(false);
+  const [promptMode, setPromptMode] = useState(false); // Toggle between upload and prompt modes
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -49,11 +51,14 @@ const TestGenerator = () => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    // Check if total files would exceed 10 (reduced for better AI processing)
-    if (formData.sourceDocuments.length + files.length > 10) {
+    // Reduce file limits for mobile for better processing
+    const maxFiles = isMobile ? 5 : 10;
+    const maxFileSize = isMobile ? 5 * 1024 * 1024 : 10 * 1024 * 1024; // 5MB for mobile, 10MB for desktop
+    
+    if (formData.sourceDocuments.length + files.length > maxFiles) {
       toast({
         title: "Too many files",
-        description: "You can upload a maximum of 10 files at once for optimal AI processing. Please remove some files first.",
+        description: `You can upload a maximum of ${maxFiles} files at once${isMobile ? ' on mobile' : ''} for optimal AI processing. Please remove some files first.`,
         variant: "destructive",
       });
       return;
@@ -73,9 +78,10 @@ const TestGenerator = () => {
           continue;
         }
 
-        // Check file size (max 25MB)
-        if (file.size > 10 * 1024 * 1024) {
-          failedUploads.push(`${file.name} (file too large - max 10MB)`);
+        // Check file size (different limits for mobile/desktop)
+        if (file.size > maxFileSize) {
+          const maxSizeMB = isMobile ? 5 : 10;
+          failedUploads.push(`${file.name} (file too large - max ${maxSizeMB}MB)`);
           continue;
         }
 
@@ -301,7 +307,7 @@ const TestGenerator = () => {
       if (!formData.instructions && !documentText && formData.sourceDocuments.length === 0) {
         toast({
           title: "Missing content",
-          description: "Please provide instructions, document text, or upload files to generate questions from.",
+          description: "Please provide AI prompt, instructions, document text, or upload files to generate questions from.",
           variant: "destructive",
         });
         setLoading(false);
@@ -311,6 +317,10 @@ const TestGenerator = () => {
       // Create content prompt from instructions and document text
       let contentPrompt = formData.instructions || 'Generate questions based on the provided content';
       
+      // Use AI prompt if provided (highest priority)
+      if (formData.aiPrompt.trim()) {
+        contentPrompt = formData.aiPrompt.trim();
+      } else {
       // Combine instructions and document text
       const textContent = [
         formData.instructions,
@@ -319,6 +329,7 @@ const TestGenerator = () => {
 
       if (textContent.trim()) {
         contentPrompt = `Generate questions based on the following content:\n\n${textContent}`;
+      }
       }
 
       // Call the Gemini AI edge function with source documents
@@ -497,12 +508,87 @@ const TestGenerator = () => {
             <CardHeader>
               <CardTitle className="dark:text-white">Upload Source Material (Optional)</CardTitle>
               <CardDescription className="dark:text-gray-400">
-                Upload up to 100 PDF documents or images, capture photos, add text content, or proceed with general instructions
+                Upload up to {isMobile ? '5' : '10'} PDF documents or images, capture photos, add text content, or use AI prompts to generate questions
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Mode Toggle */}
+              <div className="flex justify-center mb-6">
+                <div className="bg-gray-100 dark:bg-gray-700 p-1 rounded-lg flex">
+                  <Button
+                    variant={!promptMode ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setPromptMode(false)}
+                    className={`${!promptMode ? 'bg-blue-600 text-white' : 'text-gray-600 dark:text-gray-300'}`}
+                  >
+                    📁 Upload Files
+                  </Button>
+                  <Button
+                    variant={promptMode ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setPromptMode(true)}
+                    className={`${promptMode ? 'bg-blue-600 text-white' : 'text-gray-600 dark:text-gray-300'}`}
+                  >
+                    🤖 AI Prompt
+                  </Button>
+                </div>
+              </div>
+
+              {promptMode ? (
+                /* AI Prompt Mode */
+                <div className="space-y-6">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">🤖</span>
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">AI Question Generator</h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Simply describe what you want questions about, and our AI will generate them for you!
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label htmlFor="ai-prompt" className="text-base font-medium dark:text-white">
+                      What topic would you like questions about?
+                    </Label>
+                    <Textarea
+                      id="ai-prompt"
+                      placeholder="Example: 'Generate questions about photosynthesis in plants' or 'Create questions on JavaScript functions and closures' or 'Make questions about World War 2 history'"
+                      value={formData.aiPrompt}
+                      onChange={(e) => setFormData({ ...formData, aiPrompt: e.target.value })}
+                      rows={4}
+                      className="text-base dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    />
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                      <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">💡 Pro Tips:</h4>
+                      <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
+                        <li>• Be specific about the topic (e.g., "Mitochondria function in cells")</li>
+                        <li>• Mention the subject level (e.g., "High school chemistry")</li>
+                        <li>• Include any specific areas to focus on</li>
+                        <li>• The AI will create questions based on general knowledge of the topic</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {formData.aiPrompt.trim() && (
+                    <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                      <div className="flex items-start space-x-3">
+                        <span className="text-green-600 dark:text-green-400 text-lg">✨</span>
+                        <div>
+                          <h4 className="text-sm font-medium text-green-800 dark:text-green-300">AI Ready!</h4>
+                          <p className="text-sm text-green-700 dark:text-green-400 mt-1">
+                            Your prompt looks good! Click "Next" to configure your test settings and generate questions.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* File Upload Mode */
+                <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                {/* {isMobile && (
+                {isMobile && (
                   <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 sm:p-6 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
                     <Camera className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
                     <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-2">Take Photo</h3>
@@ -517,7 +603,7 @@ const TestGenerator = () => {
                       {cameraActive ? 'Camera Active' : 'Open Camera'}
                     </Button>
                   </div>
-                )} */}
+                )}
 
                 <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 sm:p-6 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
                   <Image className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
@@ -613,13 +699,13 @@ const TestGenerator = () => {
               )}
 
               <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                {formData.sourceDocuments.length}/10 files uploaded • Max 10MB per file
+                {formData.sourceDocuments.length}/{isMobile ? '5' : '10'} files uploaded • Max {isMobile ? '5' : '10'}MB per file
               </p>
 
               {/* Display uploaded files */}
               {formData.sourceDocuments.length > 0 && (
                 <div className="space-y-2">
-                  <Label className="dark:text-white">📁 Uploaded Files ({formData.sourceDocuments.length}/10)</Label>
+                  <Label className="dark:text-white">📁 Uploaded Files ({formData.sourceDocuments.length}/{isMobile ? '5' : '10'})</Label>
                   <div className="max-h-40 overflow-y-auto space-y-2 border border-gray-200 dark:border-gray-600 rounded-lg p-3 bg-gray-50 dark:bg-gray-700">
                     {formData.sourceDocuments.map((doc, index) => (
                       <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-600">
@@ -665,6 +751,8 @@ const TestGenerator = () => {
                   className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               </div>
+                </>
+              )}
 
               <div className="flex justify-end">
                 <Button 
@@ -710,12 +798,26 @@ const TestGenerator = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               {!formData.instructions && !documentText && formData.sourceDocuments.length === 0 && (
+                !formData.aiPrompt.trim() && (
                 <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 flex items-start space-x-3">
                   <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5" />
                   <div>
                     <h4 className="text-sm font-medium text-amber-800 dark:text-amber-300">No content provided</h4>
                     <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-                      You haven't provided any content yet. Please add instructions below or go back to upload content.
+                      You haven't provided any content yet. Please add AI prompt, instructions below, or go back to upload content.
+                    </p>
+                  </div>
+                </div>
+                )
+              )}
+
+              {formData.aiPrompt.trim() && (
+                <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 flex items-start space-x-3">
+                  <span className="text-purple-600 dark:text-purple-400 text-lg">🤖</span>
+                  <div>
+                    <h4 className="text-sm font-medium text-purple-800 dark:text-purple-300">AI Prompt Ready</h4>
+                    <p className="text-sm text-purple-700 dark:text-purple-400 mt-1">
+                      AI will generate questions about: "{formData.aiPrompt.substring(0, 100)}{formData.aiPrompt.length > 100 ? '...' : ''}"
                     </p>
                   </div>
                 </div>
@@ -806,7 +908,10 @@ const TestGenerator = () => {
                 <Label htmlFor="instructions" className="dark:text-white">Additional Topic or Subject Instructions</Label>
                 <Textarea
                   id="instructions"
-                  placeholder="Add any specific instructions for the AI about the topic, focus areas, or question style..."
+                  placeholder={formData.aiPrompt.trim() ? 
+                    "Add any additional specific instructions for the AI about focus areas or question style..." :
+                    "Add any specific instructions for the AI about the topic, focus areas, or question style..."
+                  }
                   value={formData.instructions}
                   onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
                   rows={3}
