@@ -588,7 +588,7 @@ const TestGenerator = () => {
                 /* File Upload Mode */
                 <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                {/* {isMobile && (
+                {isMobile && (
                   <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 sm:p-6 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
                     <Camera className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
                     <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-2">Take Photo</h3>
@@ -603,7 +603,7 @@ const TestGenerator = () => {
                       {cameraActive ? 'Camera Active' : 'Open Camera'}
                     </Button>
                   </div>
-                )} */}
+                )}
 
                 <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 sm:p-6 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
                   <Image className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
