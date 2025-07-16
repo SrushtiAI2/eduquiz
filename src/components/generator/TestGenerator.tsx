@@ -514,7 +514,7 @@ const TestGenerator = () => {
             <CardContent className="space-y-6">
               {/* Mode Toggle */}
               <div className="flex justify-center mb-6">
-                <div className="bg-gray-100 dark:bg-gray-700 p-1 rounded-lg flex">
+                <div className="bg-gray-100 dark:bg-gray-700 p-1 rounded-xl flex">
                   <Button
                     variant={!promptMode ? "default" : "ghost"}
                     size="sm"
