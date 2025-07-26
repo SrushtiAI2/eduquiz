@@ -293,35 +293,37 @@ ${test.type === 'mcq' ? `
       let yPosition = 90;
       
       // Add questions
+      // Add questions
       if (Array.isArray(test.questions)) {
         test.questions.forEach((question: any, index: number) => {
-          // Check if we need a new page
-          if (yPosition > 250) {
+          // Question text
+          doc.setFontSize(14);
+          const questionLines = doc.splitTextToSize(`Q${index + 1}. ${question.question}`, 170); // 170 for margin
+          if (yPosition + questionLines.length * 10 > 280) {
             doc.addPage();
             yPosition = 20;
           }
-          
-          // Question text
-          doc.setFontSize(14);
-          doc.text(`Q${index + 1}. ${question.question}`, 20, yPosition);
-          yPosition += 15;
-          
+          doc.text(questionLines, 20, yPosition);
+          yPosition += questionLines.length * 10;
+
           // Options for MCQ
           if (question.options && Array.isArray(question.options)) {
             doc.setFontSize(12);
             question.options.forEach((option: string, optIndex: number) => {
-              if (yPosition > 270) {
+              const optionLines = doc.splitTextToSize(`${String.fromCharCode(65 + optIndex)}. ${option}`, 160);
+              if (yPosition + optionLines.length * 10 > 280) {
                 doc.addPage();
                 yPosition = 20;
               }
-              doc.text(`${String.fromCharCode(65 + optIndex)}. ${option}`, 30, yPosition);
-              yPosition += 10;
+              doc.text(optionLines, 30, yPosition);
+              yPosition += optionLines.length * 10;
             });
           }
-          
+
           yPosition += 10; // Space between questions
         });
       }
+
       
       // Save the PDF
       doc.save(`${test.title}.pdf`);
